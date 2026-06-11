@@ -1,0 +1,6 @@
+{
+  "$schema": "https://www.partykit.io/schema.json",
+  "name": "paper-between-us",
+  "main": "party/server.ts",
+  "compatibilityDate": "2026-06-10"
+}

@@ -1,26 +1,506 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --dusk: #232036;
+  --dusk-deep: #1b1929;
+  --lamplight: #e8a75d;
+  --paper: #f7f2e7;
+  --ink: #2a2b33;
+  --slip-ink: #3a3344;
+  --font-prompt: "Fraunces", "Iowan Old Style", Georgia, serif;
+  --font-ui: "Karla", "Avenir Next", system-ui, sans-serif;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+* {
+  box-sizing: border-box;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html,
+body {
+  height: 100%;
+  margin: 0;
+  overscroll-behavior: none;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--dusk);
+  background: radial-gradient(
+    120% 90% at 50% 8%,
+    #2b2742 0%,
+    var(--dusk) 55%,
+    var(--dusk-deep) 100%
+  );
+  color: var(--paper);
+  font-family: var(--font-ui);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ---------------------------------------------------------------- stage */
+
+.stage {
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 12px;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* ------------------------------------------------------------ join card */
+
+.join {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 22px;
+  text-align: center;
+}
+
+.join h1 {
+  font-family: var(--font-prompt);
+  font-weight: 480;
+  font-size: clamp(34px, 6vw, 52px);
+  letter-spacing: 0.01em;
+  margin: 0;
+  color: var(--paper);
+}
+
+.join p.sub {
+  margin: -10px 0 0;
+  color: color-mix(in srgb, var(--paper) 62%, transparent);
+  font-size: 15px;
+}
+
+.join .join-error {
+  margin: -8px 0 0;
+  color: #d99a8a;
+  font-size: 13px;
+}
+
+.join form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: min(320px, 86vw);
+}
+
+.join input {
+  font-family: var(--font-ui);
+  font-size: 17px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid color-mix(in srgb, var(--paper) 22%, transparent);
+  background: color-mix(in srgb, var(--paper) 7%, transparent);
+  color: var(--paper);
+  outline: none;
+  text-align: center;
+}
+
+.join input:focus {
+  border-color: var(--lamplight);
+}
+
+.join input::placeholder {
+  color: color-mix(in srgb, var(--paper) 40%, transparent);
+}
+
+.join .room-code {
+  text-transform: uppercase;
+  letter-spacing: 0.35em;
+  font-size: 20px;
+}
+
+.join button[type="submit"] {
+  font-family: var(--font-ui);
+  font-size: 16px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: none;
+  background: var(--lamplight);
+  color: #2c2113;
+  cursor: pointer;
+}
+
+.join button[type="submit"]:active {
+  filter: brightness(0.92);
+}
+
+.mode-row {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+
+.mode-row button {
+  font-family: var(--font-ui);
+  font-size: 13px;
+  padding: 7px 14px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--paper) 25%, transparent);
+  background: transparent;
+  color: color-mix(in srgb, var(--paper) 70%, transparent);
+  cursor: pointer;
+}
+
+.mode-row button[aria-pressed="true"] {
+  background: color-mix(in srgb, var(--lamplight) 22%, transparent);
+  border-color: var(--lamplight);
+  color: var(--paper);
+}
+
+/* ----------------------------------------------------------- prompt slip */
+
+.slip-track {
+  height: 58px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  width: min(560px, 92vw);
+  position: relative;
+}
+
+.slip {
+  background: var(--paper);
+  color: var(--slip-ink);
+  font-family: var(--font-prompt);
+  font-weight: 470;
+  font-size: clamp(15px, 2.6vw, 19px);
+  padding: 10px 22px;
+  border-radius: 3px;
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.35),
+    0 6px 18px rgba(0, 0, 0, 0.25);
+  white-space: nowrap;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.slip.slide-in {
+  animation: slip-in 380ms cubic-bezier(0.2, 0.8, 0.3, 1) both;
+}
+
+@keyframes slip-in {
+  from {
+    transform: translateX(46px) rotate(0.6deg);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0) rotate(0deg);
+    opacity: 1;
+  }
+}
+
+/* ----------------------------------------------------------------- paper */
+
+.sheets-area {
+  position: relative; /* hosts the waiting/done veils over both sheets */
+}
+
+.sheets {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+.sheet-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.sheet-label {
+  font-family: var(--font-ui);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  color: color-mix(in srgb, var(--paper) 52%, transparent);
+}
+
+.sheet {
+  position: relative;
+  /* two square sheets of paper side by side, as large as fits */
+  aspect-ratio: 1 / 1;
+  height: min(calc(100dvh - 230px), calc(50vw - 34px));
+  border-radius: 2px;
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.45),
+    0 14px 38px rgba(0, 0, 0, 0.38),
+    0 30px 70px rgba(0, 0, 0, 0.22);
+  background: var(--paper);
+}
+
+.paint-wrap {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: 2px;
+}
+
+.paint-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+  touch-action: none;
+  cursor: none;
+}
+
+/* the partner's sheet: read-only, frosted until reveal */
+.paint-canvas.partner {
+  cursor: default;
+  pointer-events: none;
+  transition: filter 1600ms ease;
+}
+
+.sheet.frosted .paint-canvas.partner {
+  filter: blur(16px) saturate(0.94);
+}
+
+.gl-fallback {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  color: var(--ink);
+  font-family: var(--font-ui);
+  text-align: center;
+  padding: 24px;
+}
+
+/* brush cursor: thin ring sized to the live stamp radius */
+.brush-ring {
+  position: absolute;
+  top: 0;
+  left: 0;
+  border: 1px solid color-mix(in srgb, var(--ink) 55%, transparent);
+  border-radius: 50%;
+  pointer-events: none;
+  opacity: 0;
+  will-change: transform, width, height;
+}
+
+/* partner presence: a soft warm glow, no name tag, no cursor arrow */
+.partner-glow {
+  position: absolute;
+  top: -14px;
+  left: -14px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--lamplight) 55%, transparent) 0%,
+    transparent 70%
+  );
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 600ms ease;
+  will-change: transform;
+}
+
+/* -------------------------------------------------------------- tool rail */
+
+.rail {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  padding: 6px 4px 2px;
+}
+
+.tools {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+.tool {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  border: none;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+  transition: transform 180ms cubic-bezier(0.34, 1.7, 0.5, 1);
+  transform: translateY(0) rotate(0deg);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.tool[aria-pressed="true"] {
+  transform: translateY(-2px) rotate(-1.2deg);
+}
+
+/* pigment pan: a small rounded square of actual pigment with an inner
+   depression shadow */
+.pan {
+  position: absolute;
+  inset: 2px;
+  border-radius: 9px;
+  box-shadow:
+    inset 0 3px 7px rgba(0, 0, 0, 0.45),
+    inset 0 -1px 2px rgba(255, 255, 255, 0.18),
+    0 1px 2px rgba(0, 0, 0, 0.4);
+}
+
+/* wet sheen when active */
+.tool[aria-pressed="true"] .pan::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 9px;
+  background: linear-gradient(
+    160deg,
+    rgba(255, 255, 255, 0.34) 0%,
+    rgba(255, 255, 255, 0.06) 38%,
+    transparent 60%
+  );
+}
+
+/* pen nib */
+.nib {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: color-mix(in srgb, var(--paper) 85%, transparent);
+}
+
+.tool[aria-pressed="true"] .nib {
+  color: var(--lamplight);
+}
+
+.size-dot {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--paper);
+  border: 1px solid rgba(0, 0, 0, 0.4);
+  transform: scale(0.66);
+}
+
+.size-dot.large {
+  transform: scale(1);
+}
+
+/* ------------------------------------------------------------ text buttons */
+
+.quiet-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 22px;
+  min-height: 30px;
+}
+
+.quiet {
+  font-family: var(--font-ui);
+  font-size: 14px;
+  background: none;
+  border: none;
+  padding: 4px 6px;
+  color: color-mix(in srgb, var(--paper) 64%, transparent);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* button press = wet ink: darken and bleed 1px, no scale */
+.quiet:active {
+  color: var(--paper);
+  text-shadow: 0 0 1px color-mix(in srgb, var(--paper) 75%, transparent);
+}
+
+.quiet.arming {
+  color: var(--lamplight);
+}
+
+.quiet.primary {
+  color: var(--lamplight);
+}
+
+.quiet:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #888;
+}
+
+.status-dot.on {
+  background: #7fae7a;
+}
+
+/* --------------------------------------------------------------- overlays */
+
+.veil {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  text-align: center;
+  background: color-mix(in srgb, var(--paper) 88%, transparent);
+  color: var(--slip-ink);
+  border-radius: 2px;
+  padding: 24px;
+}
+
+.veil h2 {
+  font-family: var(--font-prompt);
+  font-weight: 480;
+  font-size: 24px;
+  margin: 0;
+}
+
+.veil p {
+  margin: 0;
+  font-size: 15px;
+  color: color-mix(in srgb, var(--slip-ink) 70%, transparent);
+}
+
+.players-line {
+  font-size: 13px;
+  color: color-mix(in srgb, var(--paper) 55%, transparent);
+  font-family: var(--font-ui);
+  min-height: 18px;
+}
+
+.players-line .them {
+  font-family: var(--font-prompt);
+  color: color-mix(in srgb, var(--paper) 80%, transparent);
+}
+
+/* --------------------------------------------------------- reduced motion */
+
+@media (prefers-reduced-motion: reduce) {
+  .slip.slide-in {
+    animation: none;
+  }
+  .tool {
+    transition: none;
+  }
+  .partner-glow {
+    transition: opacity 120ms linear;
+  }
+  .paint-canvas.partner {
+    transition: filter 200ms linear;
+  }
 }
