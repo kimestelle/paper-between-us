@@ -12,8 +12,8 @@ import type { FullStroke } from "./protocol";
 const PANEL = 1280; // square sheets
 const MARGIN = 64;
 const GAP = 56;
-const DUSK = "#232036";
-const PAPER = "#F7F2E7";
+const BG = "#FBFAF7"; // airy near-white, matches the app
+const INK = "#2A2B33";
 
 async function renderPanel(
   strokes: FullStroke[],
@@ -67,7 +67,7 @@ export async function renderPosterPNG(
   out.width = w;
   out.height = h;
   const ctx = out.getContext("2d")!;
-  ctx.fillStyle = DUSK;
+  ctx.fillStyle = BG;
   ctx.fillRect(0, 0, w, h);
   ctx.drawImage(a, MARGIN, MARGIN, PANEL, PANEL);
   ctx.drawImage(b, MARGIN + PANEL + GAP, MARGIN, PANEL, PANEL);
@@ -118,16 +118,16 @@ export async function renderSketchesPosterPNG({
   out.width = w;
   out.height = h;
   const ctx = out.getContext("2d")!;
-  ctx.fillStyle = DUSK;
+  ctx.fillStyle = BG;
   ctx.fillRect(0, 0, w, h);
 
   for (let i = 0; i < 4; i++) {
     const col = i % 2;
     const row = Math.floor(i / 2);
     ctx.save();
-    ctx.shadowColor = "rgba(0, 0, 0, 0.4)";
-    ctx.shadowBlur = 40;
-    ctx.shadowOffsetY = 10;
+    ctx.shadowColor = "rgba(40, 38, 32, 0.16)";
+    ctx.shadowBlur = 30;
+    ctx.shadowOffsetY = 8;
     ctx.drawImage(
       panels[i],
       GRID_MARGIN + col * (GRID_PANEL + GRID_GAP),
@@ -139,23 +139,23 @@ export async function renderSketchesPosterPNG({
     panels[i].close();
   }
 
-  // corner text — Fraunces if it's loaded, Georgia otherwise
+  // corner text — STSong if it's available, Georgia otherwise
   try {
-    await document.fonts.load('600 64px "Fraunces"');
+    await document.fonts.load('400 64px "STSong"');
   } catch {
     /* fall through to the fallback stack */
   }
-  const family = '"Fraunces", Georgia, serif';
-  ctx.fillStyle = PAPER;
+  const family = '"STSong", "STSongti-SC", "Songti SC", Georgia, serif';
+  ctx.fillStyle = INK;
 
-  ctx.font = `600 64px ${family}`;
+  ctx.font = `400 64px ${family}`;
   ctx.textBaseline = "middle";
   ctx.textAlign = "left";
   ctx.fillText(`sketches of ${subject}`, GRID_MARGIN, TITLE_BAND / 2);
 
-  ctx.font = `italic 500 52px ${family}`;
+  ctx.font = `italic 400 52px ${family}`;
   ctx.textAlign = "right";
-  ctx.globalAlpha = 0.85;
+  ctx.globalAlpha = 0.7;
   ctx.fillText(`by ${artist}`, w - GRID_MARGIN, h - TITLE_BAND / 2);
   ctx.globalAlpha = 1;
 

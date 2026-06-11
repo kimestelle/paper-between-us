@@ -427,13 +427,11 @@ export default function Home() {
                 className="quiet primary"
                 onClick={saveGridPoster}
                 disabled={exporting}
-                style={{ color: "var(--slip-ink)" }}
               >
                 {exporting ? "saving…" : "save the poster"}
               </button>
               <button
                 className="quiet"
-                style={{ color: "var(--slip-ink)" }}
                 onClick={() => setPhase(revealMode ? "revealed" : "draw")}
               >
                 keep drawing
